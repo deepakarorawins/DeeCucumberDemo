@@ -1,11 +1,13 @@
 package steps;
 
+import cucumber.api.Scenario;
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import io.appium.java_client.AppiumDriver;
 import io.appium.java_client.service.local.AppiumDriverLocalService;
 import io.appium.java_client.service.local.AppiumServiceBuilder;
 import io.appium.java_client.service.local.flags.GeneralServerFlag;
+import org.openqa.selenium.OutputType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 
 import java.io.File;
@@ -66,8 +68,16 @@ public class StartingSteps extends BaseSteps{
     }
 
     @After
-    public  void stopAppiumServer(){
-        appiumDriver.quit();
-        appiumService.stop();
+    public  void stopAppiumServer(Scenario scenario){
+        try {
+            if (scenario.isFailed()) {
+                final byte[] screenShot = appiumDriver.getScreenshotAs(OutputType.BYTES);
+                scenario.embed(screenShot, "image/png");
+            }
+            appiumDriver.quit();
+            appiumService.stop();
+        } catch (Exception e){
+            System.out.println("Exception while running Tear down: " + e.getMessage());
+        }
     }
 }
